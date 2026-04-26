@@ -1,0 +1,458 @@
+<main class="app-shell" [ngClass]="themeClass()" [ngStyle]="themeStyle()">
+  <nav class="theme-switcher" aria-label="Theme mode">
+    <button type="button" class="theme-button theme-system" [class.active]="themeMode() === 'system'" [attr.aria-pressed]="themeMode() === 'system'" (click)="setTheme('system')"><span></span>System</button>
+    <button type="button" class="theme-button theme-light-control" [class.active]="themeMode() === 'light'" [attr.aria-pressed]="themeMode() === 'light'" (click)="setTheme('light')"><span></span>Light</button>
+    <button type="button" class="theme-button theme-dark-control" [class.active]="themeMode() === 'dark'" [attr.aria-pressed]="themeMode() === 'dark'" (click)="setTheme('dark')"><span></span>Dark</button>
+  </nav>
+  <button type="button" class="saved-trips-fab" aria-label="Open saved trips" (click)="openSavedTrips()">
+    <span class="saved-trips-icon" aria-hidden="true"></span>
+    <i *ngIf="savedTrips().length">{{ savedTrips().length }}</i>
+  </button>
+
+  <section class="saved-trips-modal-backdrop" *ngIf="savedTripsOpen()" (click)="closeSavedTrips()">
+    <aside class="saved-trips-modal" role="dialog" aria-modal="true" aria-label="Saved trips" (click)="$event.stopPropagation()">
+      <div class="saved-modal-head">
+        <div>
+          <p class="eyebrow">Saved trips</p>
+          <h2>Your trip cards</h2>
+          <span>{{ savedTrips().length }} saved in this browser</span>
+        </div>
+        <button type="button" class="saved-modal-close" aria-label="Close saved trips" (click)="closeSavedTrips()">&times;</button>
+      </div>
+
+      <div class="saved-compare-toolbar" *ngIf="savedTrips().length > 1">
+        <div>
+          <span>Compare trips</span>
+          <strong>{{ compareTripIds().length }}/2 selected</strong>
+        </div>
+        <button type="button" (click)="startCompareTrips()" [disabled]="compareTripIds().length !== 2">Split compare</button>
+        <button type="button" class="muted" *ngIf="compareTripIds().length" (click)="clearCompareTrips()">Clear</button>
+      </div>
+
+      <div class="saved-empty" *ngIf="!savedTrips().length">
+        <span class="saved-empty-icon" aria-hidden="true"></span>
+        <h3>No saved trips yet</h3>
+        <p>Generate a trip plan and press Save trip to keep it here.</p>
+      </div>
+
+      <ng-container *ngIf="savedTrips().length">
+        <section class="saved-compare-view" *ngIf="comparingSavedTrips() && comparedTrips().length === 2; else savedTripsList">
+          <div class="compare-view-head">
+            <div>
+              <p class="eyebrow">Split screen</p>
+              <h3>Trip comparison</h3>
+            </div>
+            <button type="button" class="saved-modal-back" (click)="comparingSavedTrips.set(false)">Back to saved</button>
+          </div>
+
+          <div class="saved-compare-grid">
+            <article class="compare-panel" *ngFor="let saved of comparedTrips()">
+              <div class="compare-title-row">
+                <div>
+                  <span>{{ saved.destination.country }}</span>
+                  <h3>{{ destinationTitle(saved) }}</h3>
+                  <p>{{ saved.destination.tagline }}</p>
+                </div>
+                <strong>{{ money(totalBudget(saved), saved.budget.currency) }}</strong>
+              </div>
+
+              <div class="compare-metric-grid">
+                <span><strong>{{ saved.request.days }}</strong><small>Days</small></span>
+                <span><strong>{{ saved.routeMap.stops.length }}</strong><small>Stops</small></span>
+                <span><strong>{{ travelModeLabel(saved.request.travelMode) }}</strong><small>Travel</small></span>
+              </div>
+
+              <div class="compare-route-summary">
+                <strong>{{ saved.routeMap.overview }}</strong>
+                <p>{{ saved.destination.description }}</p>
+              </div>
+
+              <ul class="compare-budget-list" aria-label="Budget comparison">
+                <li><span>Accommodation</span><strong>{{ money(saved.budget.accommodation, saved.budget.currency) }}</strong></li>
+                <li><span>Food</span><strong>{{ money(saved.budget.food, saved.budget.currency) }}</strong></li>
+                <li><span>Transport</span><strong>{{ money(saved.budget.transport, saved.budget.currency) }}</strong></li>
+                <li><span>Activities</span><strong>{{ money(saved.budget.activities, saved.budget.currency) }}</strong></li>
+                <li><span>Buffer</span><strong>{{ money(saved.budget.buffer, saved.budget.currency) }}</strong></li>
+              </ul>
+
+              <ol class="compare-stop-list" aria-label="Route stops">
+                <li *ngFor="let stop of saved.routeMap.stops | slice:0:5">
+                  <span>{{ stop.name }}</span>
+                  <small>{{ money(stop.estimatedCost, saved.budget.currency) }}</small>
+                </li>
+              </ol>
+
+              <div class="saved-card-actions compare-actions">
+                <button type="button" (click)="openSavedTrip(saved)">Open this trip</button>
+                <button type="button" class="muted" (click)="removeSavedTrip(saved.id)">Remove</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <ng-template #savedTripsList>
+          <div class="saved-card-grid">
+            <article class="saved-trip-card" *ngFor="let saved of savedTrips()" [class.compare-selected]="isTripSelectedForCompare(saved.id)">
+              <div>
+                <span>{{ saved.request.days }} days</span>
+                <h3>{{ destinationTitle(saved) }}</h3>
+                <p>{{ saved.destination.tagline }}</p>
+              </div>
+              <strong>{{ money(totalBudget(saved), saved.budget.currency) }}</strong>
+              <div class="saved-card-actions">
+                <button type="button" (click)="openSavedTrip(saved)">Open</button>
+                <button type="button" class="compare-toggle" [class.selected]="isTripSelectedForCompare(saved.id)" (click)="toggleCompareTrip(saved.id)">{{ isTripSelectedForCompare(saved.id) ? 'Selected' : 'Compare' }}</button>
+                <button type="button" class="muted" (click)="removeSavedTrip(saved.id)">Remove</button>
+              </div>
+            </article>
+          </div>
+        </ng-template>
+      </ng-container>
+    </aside>
+  </section>
+  <section class="hero-panel trip-hero">
+
+    <form class="planner-form ai-planner-form" [formGroup]="form" (ngSubmit)="generateTrip()">
+      <div class="ai-console-head">
+        <div class="ai-agent-mark" aria-hidden="true"><span></span></div>
+        <div>
+          <p>Trip AI interaction</p>
+          <strong>Tell the AI your travel mood. It will build the route, weather plan, hotels, and cost cards.</strong>
+        </div>
+        <small><i [class.loading-dot]="loading()"></i>{{ loading() ? 'Planning...' : 'Ready' }}</small>
+      </div>
+
+      <div class="ai-thread" aria-label="AI travel planning conversation preview">
+        <article class="ai-message assistant-message typing-bubble">
+          <span>AI</span>
+          <p class="typing-text">I build routes, weather, hotels, maps, and budget cards from your travel vibe.</p>
+        </article>
+        <article class="ai-message user-message typing-bubble user-typing-bubble">
+          <div class="message-label-row"><span>You</span><button type="button" class="edit-vibe-btn" title="Edit travel vibe" aria-label="Edit travel vibe" (click)="focusTravelVibe()"><span></span></button></div>
+          <p class="typing-user-text">{{ form.controls.vibe.value || 'Describe your ideal travel vibe...' }}</p>
+        </article>
+      </div>
+
+      <section class="form-reveal-panel" [class.form-ready]="formReady()" aria-label="Trip plan controls">
+      <div class="prompt-chips" aria-label="Quick AI prompt ideas">
+        <button type="button" (click)="form.controls.vibe.setValue('peaceful nature, tea gardens, scenic bus rides, misty viewpoints, and local Kerala food')">Nature route</button>
+        <button type="button" (click)="form.controls.vibe.setValue('food markets, cultural streets, easy transport, photogenic cafes, and sunset viewpoints')">Food + culture</button>
+        <button type="button" (click)="form.controls.vibe.setValue('premium stay, calm mornings, private transfers, scenic viewpoints, and relaxed local dining')">Premium slow</button>
+      </div>
+
+      <label class="full ai-vibe-field">
+        <span>Travel vibe</span>
+        <textarea id="travel-vibe-input" formControlName="vibe" rows="4" placeholder="Peaceful nature, local food, scenic train rides, light adventure..."></textarea>
+      </label>
+
+      <div class="field-shell">
+        <label>
+          <span>From</span>
+          <div class="input-with-action">
+            <input formControlName="origin" placeholder="Auto detect or type city" autocomplete="off" />
+            <button
+              type="button"
+              class="location-icon-btn"
+              title="Use my location"
+              aria-label="Use my location"
+              (click)="useCurrentLocation()"
+              [disabled]="locating()"
+            >
+              <span class="location-icon" aria-hidden="true"></span>
+            </button>
+          </div>
+        </label>
+        <div class="suggestions" *ngIf="originSuggestions().length">
+          <button type="button" *ngFor="let place of originSuggestions()" (click)="selectOrigin(place)">{{ place.label }}</button>
+        </div>
+      </div>
+
+      <div class="field-shell">
+        <label>
+          <span>To</span>
+          <input formControlName="destination" placeholder="Type destination" autocomplete="off" />
+        </label>
+        <div class="suggestions" *ngIf="destinationSuggestions().length">
+          <button type="button" *ngFor="let place of destinationSuggestions()" (click)="selectDestination(place)">{{ place.label }}</button>
+        </div>
+      </div>
+      <details class="optional-fields">
+        <summary>More optional</summary>
+        <div class="optional-grid">
+          <label>
+            <span>Travel style</span>
+            <select formControlName="travelStyle">
+              <option value="slow living">Slow living</option>
+              <option value="adventure">Adventure</option>
+              <option value="culture">Culture</option>
+              <option value="food">Food</option>
+              <option value="family">Family</option>
+              <option value="luxury">Luxury</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Season</span>
+            <select formControlName="season">
+              <option value="spring">Spring</option>
+              <option value="summer">Summer</option>
+              <option value="monsoon">Monsoon</option>
+              <option value="autumn">Autumn</option>
+              <option value="winter">Winter</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Budget</span>
+            <select formControlName="budgetTier">
+              <option value="lean">Lean</option>
+              <option value="comfort">Comfort</option>
+              <option value="premium">Premium</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <label>
+        <span>Currency</span>
+        <select [value]="selectedCurrency()" (change)="changeCurrency($event)">
+          <option *ngFor="let currency of currencies" [value]="currency.code">{{ currency.code }} - {{ currency.label }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Days</span>
+        <input type="number" min="2" max="10" formControlName="days" />
+      </label>
+
+      <button type="submit" class="generate-btn" [disabled]="form.invalid || loading()">
+        {{ loading() ? 'Generating trip...' : 'Generate trip plan' }}
+      </button>
+      </section>
+    </form>
+  </section>
+
+  <!-- <p class="error" *ngIf="error()">{{ error() }}</p> -->
+  <!-- <p class="note" *ngFor="let warning of warnings()">{{ warning }}</p> -->
+
+  <section class="loading-card" *ngIf="loading()">
+    <div class="spinner"></div>
+    <h2>Designing the route...</h2>
+    <p>Checking weather, planning bus and train legs, and estimating costs.</p>
+    <div class="status-stream" *ngIf="statusMessages().length">
+      <span *ngFor="let message of statusMessages()">{{ message }}</span>
+    </div>
+  </section>
+  <div class="sticky-ai-bar" *ngIf="plan() || loading()">
+    <div class="sticky-ai-meta">
+      <span>Trip AI active</span>
+      <strong>{{ cleanPlaceName(form.controls.destination.value || 'Choose destination') }}</strong>
+    </div>
+    <input [value]="form.controls.vibe.value" (input)="form.controls.vibe.setValue(inputValue($event))" aria-label="Active travel vibe" />
+    <button type="button" (click)="generateTrip()">Update result</button>
+  </div>
+
+  <article class="result" *ngIf="plan() as trip">
+    <section class="trip-mode-card" [ngClass]="['weather-' + weatherMood(trip.weather), destinationThemeClass(trip)]">
+      <div class="trip-poster place-image-poster">
+        <button type="button" class="poster-refresh-action" title="Regenerate image" aria-label="Regenerate image" (click)="regeneratePoster(trip)"><span></span></button>
+        <img class="place-photo" [src]="posterImageUrl(trip)" [alt]="destinationTitle(trip)" loading="eager" fetchpriority="high" decoding="async" (error)="useFallbackImage($event, trip)" />
+        <div class="place-photo-shade"></div>
+        <div class="place-photo-label">
+          <span>{{ imageLoading() ? 'Generating image...' : 'AI poster image' }}</span>
+          <strong>{{ destinationTitle(trip) }}</strong>
+        </div>
+      </div>
+
+      <div class="trip-copy">
+        <p class="eyebrow">Trip mode</p>
+        <h2>{{ destinationTitle(trip) }}</h2>
+        <p>{{ trip.destination.tagline }}</p>
+        <div class="trip-stats">
+          <span><strong>{{ trip.request.days }}</strong> Days</span>
+          <span><strong>{{ trip.routeMap.stops.length }}</strong> Stops</span>
+          <span><strong>{{ money(totalBudget(trip), trip.budget.currency) }}</strong> Budget</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="destination-card destination-summary-card" [ngClass]="['weather-' + weatherMood(trip.weather), destinationThemeClass(trip)]" [ngStyle]="summaryBackgroundStyle(trip)">
+      <div>
+        <p class="eyebrow">{{ trip.destination.country }}</p>
+        <h2>{{ destinationTitle(trip) }}</h2>
+        <h3>{{ trip.destination.tagline }}</h3>
+        <p>{{ trip.destination.description }}</p>
+        <div class="chips">
+          <span *ngFor="let item of trip.destination.bestFor">{{ item }}</span>
+        </div>
+      </div>
+      <div class="total-box total-save-card" [ngStyle]="totalEstimateBackgroundStyle(trip)">
+        <span>Total estimate</span>
+        <div class="total-save-inline">
+          <strong>{{ money(totalBudget(trip), trip.budget.currency) }}</strong>
+          <button type="button" class="save-trip-btn" (click)="saveTrip(trip)">Save trip</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="weather-grid">
+      <article *ngFor="let day of trip.weather" class="weather-card" [ngClass]="weatherCardClass(day)">
+        <div class="weather-top">
+          <span>Day {{ day.day }}</span>
+          <span class="weather-icon" [ngClass]="weatherIconClass(day.condition)" aria-hidden="true"><i></i></span>
+        </div>
+        <h3>{{ day.condition }}</h3>
+        <p>{{ day.summary }}</p>
+        <div><strong>{{ day.highC }}C</strong> / {{ day.lowC }}C</div>
+        <small>{{ day.rainChance }}% rain - {{ day.outfitTip }}</small>
+      </article>
+    </section>
+
+    <section class="map-section drive-section">
+      <div class="section-title drive-title">
+        <div>
+          <p class="eyebrow">Drive details</p>
+          <p>{{ trip.routeMap.overview }}</p>
+        </div>
+      </div>
+
+      <div class="drive-detail-pill">
+        <div class="route-emblem" aria-hidden="true"><span></span></div>
+        <strong>{{ destinationTitle(trip) }}</strong>
+        <span>{{ trip.request.days }} days</span>
+        <span>{{ trip.destination.country }}</span>
+        <span>{{ travelModeLabel(trip.request.travelMode) }}</span>
+        <span>{{ trip.routeMap.stops.length }} stops</span>
+        <span>{{ money(routeCost(trip), trip.budget.currency) }} route</span>
+        <div class="avatar-stack" aria-label="Trip group">
+          <span>A</span>
+          <span>I</span>
+          <span>T</span>
+        </div>
+      </div>
+
+
+      <!-- <section class="transport-summary-card">
+        <div>
+          <p class="eyebrow">Transport expense</p>
+          <h3>{{ travelModeLabel(trip.request.travelMode) }} from {{ trip.request.origin }} to {{ destinationTitle(trip) }}</h3>
+          <p>{{ transportExpenseDetail(trip) }}</p>
+        </div>
+        <strong>{{ money(trip.budget.transport, trip.budget.currency) }}</strong>
+      </section> -->
+      <div class="map-layout">
+        <div class="drive-map real-map-shell">
+          <div id="real-route-map" class="real-route-map" aria-label="Interactive trip route map"></div>
+          <div class="map-hint">Click a numbered pin to view the place idea, day, transit note, and expense.</div>
+        </div>
+
+        <aside class="map-editor">
+          <h3>Customize route</h3>
+          <div class="stop-row" *ngFor="let stop of trip.routeMap.stops; let index = index">
+            <span>{{ index + 1 }}. {{ stop.name }}</span>
+            <small>{{ money(stop.estimatedCost, trip.budget.currency) }}</small>
+            <button type="button" (click)="moveStop(index, -1)">Up</button>
+            <button type="button" (click)="moveStop(index, 1)">Down</button>
+            <button type="button" (click)="removeStop(index)">Remove</button>
+          </div>
+          <div class="add-stop">
+            <input [value]="newStopName()" (input)="newStopName.set(inputValue($event))" placeholder="Add place" />
+            <input type="number" [value]="newStopCost()" (input)="newStopCost.set(numberValue($event))" placeholder="Cost in USD" />
+            <button type="button" (click)="addStop()">Add</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="transit-list">
+        <article *ngFor="let leg of trip.routeMap.transit">
+          <strong>{{ leg.mode | uppercase }}</strong>
+          <span>{{ stopName(leg.from, trip) }} to {{ stopName(leg.to, trip) }}</span>
+          <small>{{ leg.duration }} - {{ money(leg.estimatedCost, trip.budget.currency) }}</small>
+        </article>
+      </div>
+    </section>
+
+    <section class="budget-grid">
+      <article class="budget-card">
+        <span class="budget-icon icon-stay" aria-hidden="true"></span>
+        <div><span>Accommodation</span><strong>{{ money(trip.budget.accommodation, trip.budget.currency) }}</strong></div>
+      </article>
+      <article class="budget-card">
+        <span class="budget-icon icon-food" aria-hidden="true"></span>
+        <div><span>Food</span><strong>{{ money(trip.budget.food, trip.budget.currency) }}</strong></div>
+      </article>
+      <!-- <article class="budget-card">
+        <span class="budget-icon icon-transport" aria-hidden="true"></span>
+        <div><span>Transport</span><strong>{{ money(trip.budget.transport, trip.budget.currency) }}</strong><small>{{ transportExpenseDetail(trip) }}</small></div>
+      </article> -->
+      <article class="budget-card">
+        <span class="budget-icon icon-activity" aria-hidden="true"></span>
+        <div><span>Activities</span><strong>{{ money(trip.budget.activities, trip.budget.currency) }}</strong></div>
+      </article>
+      <article class="budget-card">
+        <span class="budget-icon icon-buffer" aria-hidden="true"></span>
+        <div><span>Buffer</span><strong>{{ money(trip.budget.buffer, trip.budget.currency) }}</strong></div>
+      </article>
+    </section>
+    <section class="hotel-summary">
+      <div class="hotel-summary-copy">
+        <p class="eyebrow">Accommodation brief</p>
+        <h2>Hotel stay idea</h2>
+        <p>{{ hotelSummary(trip) }}</p>
+      </div>
+      <div class="hotel-grid">
+        <article *ngFor="let hotel of hotelIdeas(trip); let index = index">
+          <span class="hotel-rank">0{{ index + 1 }}</span>
+          <h3>{{ hotel.name }}</h3>
+          <p>{{ hotel.description }}</p>
+          <strong>{{ money(hotel.estimate, trip.budget.currency) }}</strong>
+        </article>
+      </div>
+    </section>
+    <section class="itinerary-grid">
+      <article *ngFor="let day of trip.itinerary">
+        <p class="eyebrow">Day {{ day.day }}</p>
+        <h3>{{ day.title }}</h3>
+        <p>{{ day.theme }}</p>
+        <div *ngFor="let item of day.items" class="timeline-item">
+          <strong>{{ item.time }} - {{ item.title }}</strong>
+          <span>{{ item.place }}</span>
+          <p>{{ item.description }}</p>
+        </div>
+      </article>
+    </section>
+
+
+    <section class="ai-result-card image-backed-card" [ngStyle]="summaryBackgroundStyle(trip)">
+      <div>
+        <p class="eyebrow">Interact with Trip AI</p>
+        <h2>Refine this result</h2>
+        <p>Ask Trip AI to adjust the same result with a clearer vibe. The sticky bar stays active while you scroll.</p>
+      </div>
+      <div class="ai-result-summary">
+        <span>{{ destinationTitle(trip) }}</span>
+        <strong>{{ trip.routeMap.stops.length }} stops - {{ money(totalBudget(trip), trip.budget.currency) }}</strong>
+        <small>{{ trip.routeMap.overview }}</small>
+      </div>
+      <div class="ai-suggestion-actions">
+        <button type="button" (click)="appendVibeAndGenerate('add more local food stops and market experiences')">More food</button>
+        <button type="button" (click)="appendVibeAndGenerate('reduce cost and use more bus or train options')">Lower budget</button>
+        <button type="button" (click)="appendVibeAndGenerate('add calmer hotel stays and slower mornings')">Softer stay</button>
+      </div>
+    </section>
+    <section class="tips-card image-backed-card" [ngStyle]="summaryBackgroundStyle(trip)">
+      <p class="eyebrow">Local insider tips</p>
+      <h2>{{ trip.insiderTips.localPhrase }}</h2>
+      <p>{{ trip.insiderTips.localPhraseMeaning }}</p>
+      <p>{{ trip.insiderTips.hiddenGem }}</p>
+      <div class="chips"><span *ngFor="let dish of trip.insiderTips.mustTryDishes">{{ dish }}</span></div>
+    </section>
+  </article>
+</main>
+
+
+
+
+
+
+

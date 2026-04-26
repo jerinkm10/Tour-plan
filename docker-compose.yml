@@ -1,0 +1,45 @@
+name: tour-plan
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: tour-plan-api
+    working_dir: /app/apps/api
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - api_node_modules:/app/apps/api/node_modules
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      OPENAI_IMAGE_MODEL: ${OPENAI_IMAGE_MODEL:-gpt-image-1}
+      OPENAI_IMAGE_SIZE: ${OPENAI_IMAGE_SIZE:-1024x1024}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_IMAGE_MODEL: ${GEMINI_IMAGE_MODEL:-gemini-2.5-flash-image}
+      GEMINI_TEXT_MODEL: ${GEMINI_TEXT_MODEL:-gemini-2.5-flash}
+      STABILITY_API_KEY: ${STABILITY_API_KEY:-}
+      STABILITY_IMAGE_ASPECT_RATIO: ${STABILITY_IMAGE_ASPECT_RATIO:-3:2}
+      STABILITY_OUTPUT_FORMAT: ${STABILITY_OUTPUT_FORMAT:-png}
+    command: ["sh", "-c", "echo 'API ready. Exec: docker compose exec api /bin/sh'; tail -f /dev/null"]
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: tour-plan-web
+    working_dir: /app/apps/web
+    ports:
+      - "4200:4200"
+    volumes:
+      - .:/app
+      - web_node_modules:/app/apps/web/node_modules
+    command: ["sh", "-c", "echo 'Web ready. Exec: docker compose exec web /bin/sh'; tail -f /dev/null"]
+
+volumes:
+  api_node_modules:
+  web_node_modules:
+
+

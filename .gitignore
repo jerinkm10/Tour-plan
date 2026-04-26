@@ -1,0 +1,7 @@
+node_modules/
+.next/
+.angular/
+dist/
+coverage/
+.env
+npm-debug.log*

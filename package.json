@@ -1,0 +1,13 @@
+{
+  "name": "tour-plan",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:api": "npm run dev --workspace @tour-plan/api",
+    "dev:web": "npm run dev --workspace @tour-plan/web"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
+}
