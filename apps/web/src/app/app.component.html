@@ -113,27 +113,37 @@
   <section class="hero-panel trip-hero">
 
     <form class="planner-form ai-planner-form" [formGroup]="form" (ngSubmit)="generateTrip()">
-      <div class="ai-console-head">
-        <div class="ai-agent-mark" aria-hidden="true"><span></span></div>
-        <div>
-          <p>Trip AI interaction</p>
-          <strong>Tell the AI your travel mood. It will build the route, weather plan, hotels, and cost cards.</strong>
+      <section class="terminal-workbench" aria-label="Trip AI terminal">
+        <div class="terminal-titlebar terminal-main-header">
+          <div class="terminal-window-controls" aria-hidden="true">
+            <span class="terminal-dot dot-red"></span>
+            <span class="terminal-dot dot-yellow"></span>
+            <span class="terminal-dot dot-green"></span>
+          </div>
+          <div class="terminal-header-icon" aria-hidden="true"><span></span></div>
+          <div class="terminal-header-copy">
+            <strong>trip-ai-terminal</strong>
+            <small>route planner / weather / hotels / budget</small>
+          </div>
+          <em><i [class.loading-dot]="loading()"></i>{{ loading() ? 'planning' : 'online' }}</em>
         </div>
-        <small><i [class.loading-dot]="loading()"></i>{{ loading() ? 'Planning...' : 'Ready' }}</small>
-      </div>
 
-      <div class="ai-thread" aria-label="AI travel planning conversation preview">
-        <article class="ai-message assistant-message typing-bubble">
-          <span>AI</span>
-          <p class="typing-text">I build routes, weather, hotels, maps, and budget cards from your travel vibe.</p>
-        </article>
-        <article class="ai-message user-message typing-bubble user-typing-bubble">
-          <div class="message-label-row"><span>You</span><button type="button" class="edit-vibe-btn" title="Edit travel vibe" aria-label="Edit travel vibe" (click)="focusTravelVibe()"><span></span></button></div>
-          <p class="typing-user-text">{{ form.controls.vibe.value || 'Describe your ideal travel vibe...' }}</p>
-        </article>
-      </div>
+        <div class="terminal-body">
+          <div class="terminal-chat-feed" aria-live="polite">
+            <article class="terminal-chat-message ai-terminal-message">
+              <span class="terminal-role">AI</span>
+              <p class="terminal-ai-type">I can turn your travel mood into a complete trip plan with map stops, transport, weather, hotels, and cost cards.</p>
+            </article>
+            <article class="terminal-chat-message user-terminal-message">
+              <div class="message-label-row">
+                <span class="terminal-role">YOU</span>
+                <button type="button" class="edit-vibe-btn" title="Edit travel vibe" aria-label="Edit travel vibe" (click)="focusTravelVibe()"><span></span></button>
+              </div>
+              <p class="terminal-user-type">{{ form.controls.vibe.value || 'Describe your ideal travel vibe...' }}</p>
+            </article>
+          </div>
 
-      <section class="form-reveal-panel" [class.form-ready]="formReady()" aria-label="Trip plan controls">
+      <section class="form-reveal-panel terminal-form-panel" [class.form-ready]="formReady()" aria-label="Trip plan controls">
       <div class="prompt-chips" aria-label="Quick AI prompt ideas">
         <button type="button" (click)="form.controls.vibe.setValue('peaceful nature, tea gardens, scenic bus rides, misty viewpoints, and local Kerala food')">Nature route</button>
         <button type="button" (click)="form.controls.vibe.setValue('food markets, cultural streets, easy transport, photogenic cafes, and sunset viewpoints')">Food + culture</button>
@@ -228,6 +238,8 @@
       <button type="submit" class="generate-btn" [disabled]="form.invalid || loading()">
         {{ loading() ? 'Generating trip...' : 'Generate trip plan' }}
       </button>
+      </section>
+        </div>
       </section>
     </form>
   </section>
@@ -449,8 +461,6 @@
     </section>
   </article>
 </main>
-
-
 
 
 

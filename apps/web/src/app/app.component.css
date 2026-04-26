@@ -1954,7 +1954,6 @@ select:focus {
   border: 1px solid rgba(125, 211, 252, 0.16);
   border-radius: 8px;
   background: rgba(2, 6, 23, 0.5);
-  padding: 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 60px rgba(2, 6, 23, 0.28);
   backdrop-filter: blur(16px);
 }
@@ -2279,7 +2278,7 @@ select:focus {
   max-width: none;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
   gap: 16px;
-  padding: clamp(16px, 2.4vw, 26px);
+ 
 }
 
 .ai-console-head,
@@ -3430,6 +3429,492 @@ select:focus {
   pointer-events: auto !important;
   transform: translateY(0) !important;
   animation: none !important;
+}
+
+/* Initial Trip AI terminal test */
+.terminal-stage {
+  display: grid !important;
+  place-items: center;
+  min-height: clamp(210px, 28vw, 310px);
+  padding: clamp(16px, 3vw, 34px);
+}
+
+.ai-terminal-card {
+  width: min(620px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 38%),
+    rgba(3, 7, 18, 0.88);
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 70px rgba(34, 197, 94, 0.08);
+  color: #86efac;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  transform: translateY(8px) scale(0.985);
+  opacity: 0;
+  animation: terminalCardIn 520ms ease 120ms forwards;
+}
+
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.78));
+  padding: 0 14px;
+}
+
+.terminal-titlebar strong {
+  margin-left: 8px;
+  color: rgba(226, 232, 240, 0.42);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 16px currentColor;
+}
+
+.dot-red { background: #ef4444; color: rgba(239, 68, 68, 0.45); }
+.dot-yellow { background: #f59e0b; color: rgba(245, 158, 11, 0.45); }
+.dot-green { background: #22c55e; color: rgba(34, 197, 94, 0.45); }
+
+.terminal-lines {
+  display: grid;
+  gap: 10px;
+  padding: clamp(18px, 3vw, 30px);
+}
+
+.terminal-line {
+  position: relative;
+  width: 0;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border-right: 2px solid rgba(134, 239, 172, 0.9);
+  color: #86efac;
+  font-size: clamp(13px, 1.4vw, 16px);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.35;
+  opacity: 0;
+  text-shadow: 0 0 16px rgba(34, 197, 94, 0.2);
+  white-space: nowrap;
+}
+
+.terminal-line span {
+  color: #bbf7d0;
+}
+
+.line-one {
+  --terminal-width: 38ch;
+  animation: terminalType 920ms steps(38, end) 650ms forwards, terminalCursor 680ms step-end 650ms 2;
+}
+
+.line-two {
+  --terminal-width: 29ch;
+  animation: terminalType 820ms steps(29, end) 1650ms forwards, terminalCursor 680ms step-end 1650ms 2;
+}
+
+.line-three {
+  --terminal-width: 22ch;
+  animation: terminalType 720ms steps(22, end) 2550ms forwards, terminalCursor 680ms step-end 2550ms 2;
+}
+
+.line-four {
+  --terminal-width: 21ch;
+  animation: terminalType 700ms steps(21, end) 3350ms forwards, terminalCursor 680ms step-end 3350ms 4;
+}
+
+@keyframes terminalCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes terminalType {
+  from {
+    width: 0;
+    opacity: 1;
+  }
+  to {
+    width: var(--terminal-width);
+    opacity: 1;
+  }
+}
+
+@keyframes terminalCursor {
+  50% { border-color: transparent; }
+}
+
+.theme-light .ai-terminal-card {
+  border-color: rgba(2, 132, 199, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 38%),
+    rgba(2, 6, 23, 0.9);
+  box-shadow:
+    0 28px 80px rgba(2, 132, 199, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 70px rgba(34, 197, 94, 0.1);
+}
+
+@media (max-width: 640px) {
+  .terminal-stage {
+    min-height: 250px;
+    padding-inline: 4px;
+  }
+
+  .terminal-lines {
+    gap: 9px;
+    padding: 18px 14px;
+  }
+
+  .terminal-line {
+    font-size: 11px;
+  }
+}
+
+/* Full terminal first view */
+.trip-hero .ai-planner-form {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.ai-planner-form > .terminal-workbench {
+  grid-column: 1 / -1;
+  width: 100%;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  animation: none !important;
+}
+
+.terminal-workbench {
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.08), transparent 42%),
+    radial-gradient(circle at 80% 6%, rgba(56, 189, 248, 0.14), transparent 220px),
+    rgba(2, 6, 23, 0.92);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.terminal-main-header {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.18);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(2, 6, 23, 0.86));
+  padding: 10px 16px;
+}
+
+.terminal-window-controls {
+  display: flex;
+  gap: 7px;
+}
+
+.terminal-header-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(37, 99, 235, 0.9));
+  box-shadow: 0 0 28px rgba(14, 165, 233, 0.22);
+}
+
+.terminal-header-icon::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 14px;
+  border: 2px solid #e0f2fe;
+  border-radius: 7px;
+}
+
+.terminal-header-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 7px;
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  background: #e0f2fe;
+}
+
+.terminal-header-icon span {
+  position: absolute;
+  top: 13px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #e0f2fe;
+  box-shadow: 9px 0 0 #e0f2fe;
+}
+
+.terminal-header-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.terminal-header-copy strong {
+  color: #e0f2fe;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.terminal-header-copy small {
+  overflow: hidden;
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terminal-main-header em {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  color: #bbf7d0;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.terminal-main-header em i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.8);
+}
+
+.terminal-body {
+  display: grid;
+  gap: 18px;
+  padding: clamp(16px, 2.4vw, 28px);
+}
+
+.terminal-chat-feed {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.terminal-chat-message {
+  min-width: 0;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.08), transparent),
+    rgba(15, 23, 42, 0.78);
+  padding: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.user-terminal-message {
+  background:
+    linear-gradient(180deg, rgba(37, 99, 235, 0.16), transparent),
+    rgba(15, 23, 42, 0.78);
+}
+
+.terminal-role {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #38bdf8;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.terminal-chat-message p {
+  margin: 0;
+  color: #86efac;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.terminal-ai-type {
+  overflow: hidden;
+  width: 0;
+  max-width: 100%;
+  border-right: 2px solid #7dd3fc;
+  white-space: nowrap;
+  animation: terminalChatType 3s steps(110, end) 350ms forwards, terminalCursor 720ms step-end 350ms 5;
+}
+
+.user-terminal-message {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: terminalMessageIn 520ms ease 3.35s forwards;
+}
+
+.terminal-user-type {
+  overflow: hidden;
+  width: 0;
+  max-width: 100%;
+  border-right: 2px solid #7dd3fc;
+  white-space: nowrap;
+  animation: terminalUserType 1.55s steps(72, end) 3.75s forwards, terminalCursor 720ms step-end 3.75s 4;
+}
+
+.terminal-form-panel {
+  position: relative;
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+  padding: 18px;
+}
+
+.terminal-form-panel::before {
+  content: '$ open trip-form';
+  grid-column: 1 / -1;
+  color: #86efac;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.terminal-workbench .terminal-form-panel {
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(16px) !important;
+  transition: opacity 420ms ease, transform 420ms ease, max-height 520ms ease;
+}
+
+.terminal-workbench .terminal-form-panel.form-ready {
+  max-height: 1500px !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
+}
+
+.terminal-workbench label span,
+.terminal-workbench .optional-fields summary {
+  color: #38bdf8;
+}
+
+.terminal-workbench input,
+.terminal-workbench textarea,
+.terminal-workbench select {
+  border-color: rgba(56, 189, 248, 0.24);
+  background-color: rgba(2, 6, 23, 0.74);
+  color: #e0f2fe;
+}
+
+.terminal-workbench input::placeholder,
+.terminal-workbench textarea::placeholder {
+  color: rgba(186, 230, 253, 0.52);
+}
+
+.terminal-workbench .optional-fields {
+  background: rgba(15, 23, 42, 0.66);
+}
+
+.terminal-workbench .prompt-chips button,
+.terminal-workbench .location-icon-btn {
+  border-color: rgba(56, 189, 248, 0.22);
+  background: rgba(14, 165, 233, 0.14);
+  color: #dbeafe;
+}
+
+.terminal-workbench .generate-btn {
+  background: linear-gradient(135deg, #0ea5e9, #1d4ed8);
+}
+
+.theme-light .terminal-workbench {
+  border-color: rgba(2, 132, 199, 0.2);
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.1), transparent 42%),
+    rgba(2, 6, 23, 0.92);
+  box-shadow:
+    0 30px 90px rgba(2, 132, 199, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+@keyframes terminalChatType {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes terminalUserType {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes terminalMessageIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 880px) {
+  .terminal-chat-feed {
+    grid-template-columns: 1fr;
+  }
+
+  .terminal-ai-type,
+  .terminal-user-type {
+    width: auto;
+    border-right: 0;
+    white-space: normal;
+    animation: softFadeIn 600ms ease both;
+  }
+
+  .user-terminal-message {
+    animation-delay: 900ms;
+  }
+}
+
+@media (max-width: 640px) {
+  .terminal-main-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .terminal-header-icon {
+    display: none;
+  }
+
+  .terminal-header-copy strong {
+    font-size: 12px;
+  }
+
+  .terminal-main-header em {
+    padding: 6px 8px;
+  }
 }
 /* SSE status, real-image action, and saved-trip controls */
 .status-stream {

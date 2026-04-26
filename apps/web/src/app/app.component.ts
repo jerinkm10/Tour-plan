@@ -109,7 +109,7 @@ export class AppComponent implements OnDestroy {
   constructor() {
     this.setupThemePreference();
     this.savedTrips.set(this.readSavedTrips());
-    this.formRevealTimer = window.setTimeout(() => this.formReady.set(true), 5400);
+    this.formRevealTimer = window.setTimeout(() => this.formReady.set(true), 5600);
 
     this.form.controls.origin.valueChanges
       .pipe(
