@@ -3916,6 +3916,75 @@ select:focus {
     padding: 6px 8px;
   }
 }
+
+@media (max-width: 640px) {
+  .trip-hero {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .trip-hero .ai-planner-form {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .terminal-workbench {
+    border-radius: 8px;
+  }
+
+  .terminal-body {
+    gap: 0;
+    padding: 0;
+  }
+
+  .terminal-chat-feed {
+    gap: 0;
+  }
+
+  .terminal-chat-message {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 16px 18px;
+  }
+
+  .terminal-chat-message + .terminal-chat-message,
+  .terminal-form-panel {
+    border-top: 1px solid rgba(56, 189, 248, 0.16);
+  }
+
+  .terminal-form-panel {
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 18px;
+  }
+
+  .terminal-form-panel.form-ready {
+    overflow: hidden !important;
+  }
+
+  .terminal-form-panel .prompt-chips,
+  .terminal-form-panel .ai-vibe-field,
+  .terminal-form-panel .field-shell,
+  .terminal-form-panel label,
+  .terminal-form-panel .optional-fields,
+  .terminal-form-panel .generate-btn {
+    width: 100%;
+  }
+
+  .terminal-workbench .optional-fields {
+    border-color: rgba(56, 189, 248, 0.16);
+    background: rgba(15, 23, 42, 0.4);
+  }
+}
 /* SSE status, real-image action, and saved-trip controls */
 .status-stream {
   display: grid;
